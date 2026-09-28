@@ -35,6 +35,8 @@ export default function Home() {
   const [mediaSearch, setMediaSearch] = useState("");
   const [mediaFilter, setMediaFilter] = useState("All");
   const [workspaceHydrated, setWorkspaceHydrated] = useState(false);
+  const [campaignHistory, setCampaignHistory] = useState<any[]>([]);
+  const [campaignHistoryHydrated, setCampaignHistoryHydrated] = useState(false);
 
   useEffect(() => {
     setWorkspaceReady(true);
@@ -179,8 +181,6 @@ export default function Home() {
     })),
   ].slice(0, 8);
 
-  const [campaignHistory, setCampaignHistory] = useState<any[]>([]);
-  const [campaignHistoryHydrated, setCampaignHistoryHydrated] = useState(false);
 
   const growthOpportunities = analyzedAssets.flatMap((asset) =>
     (asset.analysis?.opportunities ?? []).map((opportunity) => ({
