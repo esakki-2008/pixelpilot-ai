@@ -4,7 +4,7 @@ const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemi
 
 export async function POST(request: NextRequest) {
   try {
-    const { question, assets } = await request.json();
+    const { question, assets, campaigns } = await request.json();
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
@@ -12,6 +12,17 @@ export async function POST(request: NextRequest) {
         { status: 200 }
       );
     }
+
+    const safeCampaigns = Array.isArray(campaigns)
+      ? campaigns.slice(0, 12).map((c: any) => ({
+          campaignName: c?.campaign?.campaignName,
+          headline: c?.campaign?.headline,
+          goal: c?.goal,
+          audience: c?.audience,
+          platform: c?.platform,
+          createdAt: c?.createdAt,
+        }))
+      : [];
 
     const safeAssets = Array.isArray(assets)
       ? assets.slice(0, 10).map((a: any) => ({
@@ -27,9 +38,9 @@ export async function POST(request: NextRequest) {
       : [];
 
     const prompt = `You are PixelPilot, an AI business copilot for small businesses.
-Answer the user's business question using ONLY the provided media intelligence. Be concise, practical, and action-oriented.
+Answer the user's business question using ONLY the provided workspace intelligence. Be concise, practical, and action-oriented.
 Do not invent sales, customer, revenue, or performance data that is not provided.
-If the available media is insufficient, clearly say what additional information is needed.
+Use campaign history when relevant, but never treat campaign creation as campaign performance. If workspace data is insufficient, clearly say what additional information is needed.
 Return JSON with: answer (string), actions (array of max 4 short strings), opportunity (string), confidence ("High"|"Medium"|"Low").
 
 User question: ${String(question || "").slice(0, 500)}
