@@ -74,6 +74,12 @@ export default function Home() {
   const [copilotQuestion, setCopilotQuestion] = useState("Which uploaded product should I promote first?");
   const [copilotResult, setCopilotResult] = useState<{answer:string;actions:string[];opportunity:string;confidence:string} | null>(null);
   const [copilotLoading, setCopilotLoading] = useState(false);
+  const copilotPrompts = [
+    "What should I promote first?",
+    "Which assets need improvement?",
+    "What should I post this week?",
+    "Which products have the strongest media?",
+  ];
   const [campaignGoal, setCampaignGoal] = useState("Product awareness");
   const [campaignAudience, setCampaignAudience] = useState("Developers and tech-savvy users");
   const [campaignPlatform, setCampaignPlatform] = useState("LinkedIn");
@@ -110,7 +116,7 @@ export default function Home() {
     if (!copilotQuestion.trim() || copilotLoading) return;
     setCopilotLoading(true); setCopilotResult(null);
     try {
-      const response = await fetch("/api/copilot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: copilotQuestion, assets: uploadedAssets }) });
+      const response = await fetch("/api/copilot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: copilotQuestion, assets: uploadedAssets, campaigns: campaignHistory }) });
       const data = await response.json();
       if (data.result) setCopilotResult(data.result); else setCopilotResult({ answer: data.error || "Copilot is not configured yet.", actions: [], opportunity: "", confidence: "Low" });
     } catch { setCopilotResult({ answer: "Copilot request failed.", actions: [], opportunity: "", confidence: "Low" }); }
@@ -313,7 +319,7 @@ export default function Home() {
               <div className="recommendation"><span className="priority medium">MEDIUM</span><strong>{needsOptimization} {needsOptimization === 1 ? "asset needs" : "assets need"} optimization</strong><p>{needsOptimization ? "Generate platform-ready variants before publishing." : "No optimization blockers detected in the analyzed library."}</p></div>
               <div className="recommendation"><span className="priority opportunity">OPPORTUNITY</span><strong>{opportunityCount} growth {opportunityCount === 1 ? "signal" : "signals"} discovered</strong><p>{opportunityCount ? "PixelPilot found practical actions inside your uploaded media." : "Upload and analyze more media to discover business opportunities."}</p></div>
             </> : <div className="recommendation-empty"><Sparkles size={17} /><strong>Your AI recommendations will appear here.</strong><p>Upload media and PixelPilot will identify quality, readiness, issues, and growth opportunities.</p></div>}
-            <div className="copilot-box"><div className="copilot-label">ASK YOUR BUSINESS COPILOT</div><textarea value={copilotQuestion} onChange={(e) => setCopilotQuestion(e.target.value)} placeholder="Ask about your uploaded media..." /><button className="copilot-button" onClick={askCopilot} disabled={copilotLoading}><BrainCircuit size={17} /> {copilotLoading ? "Thinking…" : "Ask PixelPilot"} <ArrowUpRight size={15} /></button>{copilotResult && <div className="copilot-result"><b>{copilotResult.answer}</b>{copilotResult.opportunity && <p><strong>Opportunity:</strong> {copilotResult.opportunity}</p>}{copilotResult.actions.length > 0 && <ol>{copilotResult.actions.map((action) => <li key={action}>{action}</li>)}</ol>}<small>Confidence: {copilotResult.confidence}</small></div>}</div>
+            <div className="copilot-box"><div className="copilot-label">ASK YOUR BUSINESS COPILOT</div><div className="copilot-prompts">{copilotPrompts.map((prompt) => <button key={prompt} type="button" onClick={() => setCopilotQuestion(prompt)}>{prompt}</button>)}</div><textarea value={copilotQuestion} onChange={(e) => setCopilotQuestion(e.target.value)} placeholder="Ask about your media, growth signals, or campaigns..." /><button className="copilot-button" onClick={askCopilot} disabled={copilotLoading}><BrainCircuit size={17} /> {copilotLoading ? "Thinking…" : "Ask PixelPilot"} <ArrowUpRight size={15} /></button>{copilotResult && <div className="copilot-result"><b>{copilotResult.answer}</b>{copilotResult.opportunity && <p><strong>Opportunity:</strong> {copilotResult.opportunity}</p>}{copilotResult.actions.length > 0 && <div className="copilot-actions"><span>NEXT ACTIONS</span><ol>{copilotResult.actions.map((action) => <li key={action}>{action}</li>)}</ol></div>}<div className="copilot-confidence"><small>Confidence: {copilotResult.confidence}</small><button type="button" onClick={() => setCopilotResult(null)}>Clear</button></div></div>}</div>
           </article>
         </div>
       </section>
