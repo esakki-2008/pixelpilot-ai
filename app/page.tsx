@@ -236,6 +236,26 @@ export default function Home() {
                 <div className="asset-score"><strong>{selectedAsset.analysis.mediaHealth}</strong><span>Media Health</span></div>
                 <div className="asset-detail"><span>SUMMARY</span><p>{selectedAsset.analysis.summary}</p></div>
               </div>
+              {selectedAsset.url && <div className="creative-studio">
+                <div className="creative-studio-head">
+                  <div><span>CREATIVE STUDIO</span><strong>One asset. Every channel.</strong><p>Cloudinary generates optimized, delivery-ready variants from the original media.</p></div>
+                  <span className="studio-badge"><Cloud size={12} /> Cloudinary</span>
+                </div>
+                <div className="variant-studio-grid">
+                  {[
+                    ["Instagram", "1080 × 1080", 1080, 1080],
+                    ["Story", "1080 × 1920", 1080, 1920],
+                    ["LinkedIn", "1200 × 627", 1200, 627],
+                    ["Web", "1600 × 900", 1600, 900],
+                  ].map(([name, dimensions, width, height]) => {
+                    const variantUrl = cloudinaryVariant(selectedAsset.url!, Number(width), Number(height));
+                    return <article className="variant-studio-card" key={String(name)}>
+                      <img src={variantUrl} alt={`${name} optimized variant`} />
+                      <div className="variant-studio-info"><div><strong>{name}</strong><span>{dimensions}</span></div><a href={variantUrl} target="_blank" rel="noreferrer">Open delivered asset <ArrowUpRight size={12} /></a></div>
+                    </article>;
+                  })}
+                </div>
+              </div>}
               <div className="asset-detail-section">
                 <span>TAGS</span>
                 <div className="tag-list">{selectedAsset.analysis.tags?.map((tag) => <span key={tag}>{tag}</span>)}</div>
