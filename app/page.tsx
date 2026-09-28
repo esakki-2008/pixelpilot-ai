@@ -30,11 +30,23 @@ export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [uploadedAssets, setUploadedAssets] = useState<Asset[]>([]);
   const [selectedAssetKey, setSelectedAssetKey] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [workspaceReady, setWorkspaceReady] = useState(false);
   const [mediaSearch, setMediaSearch] = useState("");
   const [mediaFilter, setMediaFilter] = useState("All");
   const [workspaceHydrated, setWorkspaceHydrated] = useState(false);
 
   useEffect(() => {
+    setWorkspaceReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(null), 3200);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+
     try {
       const saved = window.localStorage.getItem("pixelpilot-assets-v1");
       if (saved) setUploadedAssets(JSON.parse(saved));
@@ -275,6 +287,7 @@ export default function Home() {
           <h1>Your media already contains <span>growth signals.</span></h1>
           <p>PixelPilot turns product images and marketing assets into actionable insights, optimized media, and smarter growth decisions.</p>
           <div className="hero-actions">
+            <div className="workspace-status"><span className="status-dot"/><strong>{workspaceReady ? "Workspace ready" : "Loading workspace"}</strong><span>Cloudinary connected</span><span>AI intelligence live</span></div>
             <CloudinaryUpload onUploaded={handleUploaded} />
             <button className="secondary" onClick={() => document.getElementById("copilot")?.scrollIntoView({ behavior: "smooth" })}><BrainCircuit size={17} /> Ask PixelPilot</button>
           </div>
