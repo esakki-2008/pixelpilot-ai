@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { goal, audience, platform, assets } = await request.json();
+    const { goal, audience, platform, assets, opportunity } = await request.json();
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return NextResponse.json({ error: "Add GEMINI_API_KEY to .env.local to enable the Campaign Generator." }, { status: 200 });
 
@@ -21,6 +21,9 @@ Return concise, ready-to-use copy.
 Goal: ${String(goal || "product awareness").slice(0, 200)}
 Audience: ${String(audience || "general audience").slice(0, 150)}
 Primary platform: ${String(platform || "LinkedIn").slice(0, 80)}
+
+Active growth signal:
+${opportunity ? JSON.stringify({ product: opportunity.product, opportunity: opportunity.opportunity, recommendation: opportunity.recommendation }) : "None selected. Choose the strongest evidence-backed opportunity from the media intelligence."}
 
 Media intelligence:
 ${JSON.stringify(intelligence)}`;
