@@ -100,8 +100,6 @@ export default function Home() {
   const [campaignPlatform, setCampaignPlatform] = useState("LinkedIn");
   const [campaignLoading, setCampaignLoading] = useState(false);
   const [campaign, setCampaign] = useState<any>(null);
-  const [campaignHistory, setCampaignHistory] = useState<any[]>([]);
-  const [campaignHistoryHydrated, setCampaignHistoryHydrated] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<{ product: string; opportunity: string; recommendation: string } | null>(null);
 
   const cloudinaryVariant = (url: string, width: number, height: number) => url.replace("/upload/", `/upload/c_fill,w_${width},h_${height},q_auto,f_auto/`);
@@ -180,6 +178,9 @@ export default function Home() {
       opportunity: item,
     })),
   ].slice(0, 8);
+
+  const [campaignHistory, setCampaignHistory] = useState<any[]>([]);
+  const [campaignHistoryHydrated, setCampaignHistoryHydrated] = useState(false);
 
   const growthOpportunities = analyzedAssets.flatMap((asset) =>
     (asset.analysis?.opportunities ?? []).map((opportunity) => ({
