@@ -30,6 +30,8 @@ export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [uploadedAssets, setUploadedAssets] = useState<Asset[]>([]);
   const [selectedAssetKey, setSelectedAssetKey] = useState<string | null>(null);
+  const [mediaSearch, setMediaSearch] = useState("");
+  const [mediaFilter, setMediaFilter] = useState("All");
   const [workspaceHydrated, setWorkspaceHydrated] = useState(false);
 
   useEffect(() => {
@@ -102,6 +104,28 @@ export default function Home() {
     ? analyzedAssets.find((asset) => asset.analysis?.product === selectedOpportunity.product && asset.url) || analyzedAssets.find((asset) => asset.url)
     : analyzedAssets.find((asset) => asset.url);
   const needsOptimization = analyzedAssets.filter((asset) => asset.analysis?.platformReadiness !== "Ready").length;
+  const filteredAssets = uploadedAssets.filter((asset) => {
+    const q = mediaSearch.trim().toLowerCase();
+    const haystack = [
+      asset.public_id,
+      asset.analysis?.product,
+      asset.analysis?.category,
+      asset.analysis?.quality,
+      asset.analysis?.platformReadiness,
+      ...(asset.analysis?.tags ?? []),
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    const matchesSearch = !q || haystack.includes(q);
+    const matchesFilter =
+      mediaFilter === "All" ||
+      (mediaFilter === "Analyzed" && Boolean(asset.analysis)) ||
+      (mediaFilter === "Needs optimization" && asset.analysis?.platformReadiness !== "Ready" && Boolean(asset.analysis)) ||
+      (mediaFilter === "Campaign-ready" && asset.analysis?.platformReadiness === "Ready") ||
+      (mediaFilter === "High quality" && ["Excellent", "Good"].includes(asset.analysis?.quality || ""));
+
+    return matchesSearch && matchesFilter;
+  });
+
   const growthOpportunities = analyzedAssets.flatMap((asset) =>
     (asset.analysis?.opportunities ?? []).map((opportunity) => ({
       product: asset.analysis?.product || "Uploaded product",
@@ -247,12 +271,19 @@ export default function Home() {
       </section>
 
       <section className="workspace" id="media">
-        <div className="section-heading"><div><div className="eyebrow">MEDIA INTELLIGENCE</div><h2>Make every asset work harder.</h2></div><button className="text-button">View media library <ArrowUpRight size={15} /></button></div>
+        <div className="section-heading"><div><div className="eyebrow">MEDIA INTELLIGENCE</div><h2>Make every asset work harder.</h2></div><span className="overview-note">{filteredAssets.length} of {uploadedAssets.length} assets</span></div>
+        <div className="media-library-toolbar">
+          <input value={mediaSearch} onChange={(e) => setMediaSearch(e.target.value)} placeholder="Search product, category, tag, quality…" />
+          <select value={mediaFilter} onChange={(e) => setMediaFilter(e.target.value)}>
+            <option>All</option><option>Analyzed</option><option>Campaign-ready</option><option>Needs optimization</option><option>High quality</option>
+          </select>
+          <button type="button" onClick={() => { setMediaSearch(""); setMediaFilter("All"); }}>Reset</button>
+        </div>
         <div className="workspace-grid">
           <article className="panel media-panel">
             <div className="panel-top"><div><h3>Recent media</h3><p>Managed and delivered through Cloudinary</p></div><span className="status"><span /> Live</span></div>
             <div className="media-grid">
-              {uploadedAssets.length ? uploadedAssets.map((asset, i) => (
+              {filteredAssets.length ? filteredAssets.map((asset, i) => (
                 <div className="media-tile" key={asset.public_id ?? i}>
                   <button className="media-preview-button" onClick={() => setSelectedAssetKey(asset.public_id || asset.url || null)} aria-label={`Open intelligence for ${asset.analysis?.product || "uploaded asset"}`}>
                     <img className="uploaded-media" src={asset.url} alt={asset.public_id ?? "Uploaded asset"} />
@@ -260,7 +291,7 @@ export default function Home() {
                   <div className="media-name-row"><span>{asset.public_id?.split("/").pop() ?? "Uploaded asset"}</span>{asset.analysis && <button className="inspect-button" onClick={() => setSelectedAssetKey(asset.public_id || asset.url || null)}>Inspect</button>}</div>
                   {asset.url && <div className="optimization-box"><div className="optimization-title"><WandSparkles size={12} /> Cloudinary Optimizer</div><div className="variant-row"><a href={cloudinaryVariant(asset.url, 1080, 1080)} target="_blank" rel="noreferrer">Instagram</a><a href={cloudinaryVariant(asset.url, 1080, 1920)} target="_blank" rel="noreferrer">Story</a><a href={cloudinaryVariant(asset.url, 1200, 627)} target="_blank" rel="noreferrer">LinkedIn</a><a href={cloudinaryVariant(asset.url, 1600, 900)} target="_blank" rel="noreferrer">Web</a></div></div>}
                   {asset.analyzing && <span className="analysis-loading">Analyzing with AI…</span>}
-                  {asset.analysis && <div className="analysis-mini"><b>{asset.analysis.mediaHealth}/100 Media Health</b><span>{asset.analysis.product} · {asset.analysis.platformReadiness}</span><small>{asset.analysis.recommendation}</small></div>}
+                  {asset.analysis && <div className="analysis-mini"><b>{asset.analysis.mediaHealth}/100 Media Health</b><span>{asset.analysis.product} · {asset.analysis.platformReadiness}</span><small>{asset.analysis.recommendation}</small>{campaignHistory.some((item) => item.sourceAsset === asset.url) && <em>Used in campaign history</em>}</div>}
                   {asset.analysisError && <span className="analysis-error">{asset.analysisError}</span>}
                 </div>
               )) : <div className="media-empty"><ImageIcon size={24} /><strong>Your media library is ready.</strong><span>Upload product images or marketing assets to build your intelligence layer.</span></div>}
