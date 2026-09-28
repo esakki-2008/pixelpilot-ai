@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CloudinaryUpload from "../components/cloudinary-upload";
 import { ArrowUpRight, BarChart3, BrainCircuit, Cloud, ImageIcon, Menu, Sparkles, Zap, WandSparkles } from "lucide-react";
 
@@ -26,16 +26,30 @@ type Asset = {
   analysisError?: string;
 };
 
-const insights = [
-  { label: "Media Health", value: "84%", note: "+12% this week", icon: BarChart3 },
-  { label: "Assets Ready", value: "128", note: "of 146 assets", icon: ImageIcon },
-  { label: "Opportunities", value: "17", note: "AI identified", icon: Sparkles },
-  { label: "Cloudinary", value: "Connected", note: "Media pipeline active", icon: Cloud },
-];
-
 export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [uploadedAssets, setUploadedAssets] = useState<Asset[]>([]);
+  const [workspaceHydrated, setWorkspaceHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("pixelpilot-assets-v1");
+      if (saved) setUploadedAssets(JSON.parse(saved));
+    } catch {
+      // Ignore malformed or unavailable browser storage.
+    } finally {
+      setWorkspaceHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!workspaceHydrated) return;
+    try {
+      window.localStorage.setItem("pixelpilot-assets-v1", JSON.stringify(uploadedAssets));
+    } catch {
+      // Ignore storage quota/privacy-mode errors; Cloudinary remains the source media store.
+    }
+  }, [uploadedAssets, workspaceHydrated]);
   const [copilotQuestion, setCopilotQuestion] = useState("Which uploaded product should I promote first?");
   const [copilotResult, setCopilotResult] = useState<{answer:string;actions:string[];opportunity:string;confidence:string} | null>(null);
   const [copilotLoading, setCopilotLoading] = useState(false);
@@ -52,6 +66,7 @@ export default function Home() {
     : 0;
   const readyAssets = analyzedAssets.filter((asset) => asset.analysis?.platformReadiness === "Ready").length;
   const opportunityCount = analyzedAssets.reduce((sum, asset) => sum + (asset.analysis?.opportunities?.length ?? 0), 0);
+  const issueCount = analyzedAssets.reduce((sum, asset) => sum + (asset.analysis?.issues?.length ?? 0), 0);
   const needsOptimization = analyzedAssets.filter((asset) => asset.analysis?.platformReadiness !== "Ready").length;
   const growthOpportunities = analyzedAssets.flatMap((asset) =>
     (asset.analysis?.opportunities ?? []).map((opportunity) => ({
@@ -86,9 +101,9 @@ export default function Home() {
   };
 
   const handleUploaded = async (asset: Asset & { secure_url?: string }) => {
-    const index = uploadedAssets.length;
     const url = asset.secure_url || asset.url;
-    setUploadedAssets((current) => [...current, { ...asset, url, analyzing: Boolean(url) }]);
+    const assetKey = asset.public_id || url || `asset-${Date.now()}`;
+    setUploadedAssets((current) => [...current, { ...asset, url, public_id: asset.public_id || assetKey, analyzing: Boolean(url) }]);
 
     if (!url) return;
 
@@ -102,7 +117,7 @@ export default function Home() {
 
       setUploadedAssets((current) =>
         current.map((item, i) =>
-          i === index
+          (item.public_id || item.url) === assetKey
             ? data.analysis
               ? { ...item, analysis: data.analysis, analyzing: false }
               : { ...item, analyzing: false, analysisError: data.error || "AI analysis is not configured yet." }
@@ -112,7 +127,7 @@ export default function Home() {
     } catch {
       setUploadedAssets((current) =>
         current.map((item, i) =>
-          i === index ? { ...item, analyzing: false, analysisError: "Analysis request failed." } : item,
+          (item.public_id || item.url) === assetKey ? { ...item, analyzing: false, analysisError: "Analysis request failed." } : item,
         ),
       );
     }
@@ -165,13 +180,17 @@ export default function Home() {
       <section className="product-intelligence">
         <div className="section-heading"><div><div className="eyebrow">PRODUCT INTELLIGENCE</div><h2>From media to business signals.</h2></div><span className="overview-note">{analyzedAssets.length} products understood</span></div>
         <div className="signal-grid">
-          <article className="signal-card"><div className="signal-number">{readyAssets || "—"}</div><div><strong>Campaign-ready</strong><p>Strong assets PixelPilot can activate now.</p></div></article>
-          <article className="signal-card"><div className="signal-number">{needsOptimization || "—"}</div><div><strong>Need optimization</strong><p>Media that can improve before publishing.</p></div></article>
-          <article className="signal-card"><div className="signal-number">{opportunityCount || "—"}</div><div><strong>Growth signals</strong><p>AI opportunities discovered in your library.</p></div></article>
+          <article className="signal-card"><div className="signal-number">{readyAssets}</div><div><strong>Campaign-ready</strong><p>Strong assets PixelPilot can activate now.</p></div></article>
+          <article className="signal-card"><div className="signal-number">{needsOptimization}</div><div><strong>Need optimization</strong><p>Media that can improve before publishing.</p></div></article>
+          <article className="signal-card"><div className="signal-number">{opportunityCount}</div><div><strong>Growth signals</strong><p>AI opportunities discovered in your library.</p></div></article>
         </div>
       </section>
 
-      <section className="growth-opportunities" id="growth-opportunities">\n        <div className="section-heading"><div><div className="eyebrow">GROWTH OPPORTUNITIES</div><h2>Turn signals into actions.</h2></div><span className="overview-note">{growthOpportunities.length} opportunities surfaced</span></div>\n        {growthOpportunities.length ? <div className="opportunity-grid">{growthOpportunities.map((item, index) => <article className="opportunity-card" key={item.product + item.opportunity + index}><div className="opportunity-top"><span className="priority opportunity">OPPORTUNITY</span><span className="opportunity-health">{item.health}/100</span></div><h3>{item.opportunity}</h3><div className="opportunity-product">{item.product} · {item.readiness}</div><p>{item.recommendation}</p><button className="opportunity-action" onClick={() => document.getElementById("campaigns")?.scrollIntoView({ behavior: "smooth" })}><Sparkles size={14} /> Create campaign</button></article>)}</div> : <div className="opportunity-empty"><Sparkles size={18} /><strong>Analyze your media to surface growth opportunities.</strong><span>PixelPilot will connect media signals to practical business actions.</span></div>}\n      </section>\n\n      <section className="workspace" id="media">
+      <section className="growth-opportunities" id="growth-opportunities">
+        <div className="section-heading"><div><div className="eyebrow">GROWTH OPPORTUNITIES</div><h2>Turn signals into actions.</h2></div><span className="overview-note">{growthOpportunities.length} opportunities surfaced</span></div>\n        {growthOpportunities.length ? <div className="opportunity-grid">{growthOpportunities.map((item, index) => <article className="opportunity-card" key={item.product + item.opportunity + index}><div className="opportunity-top"><span className="priority opportunity">OPPORTUNITY</span><span className="opportunity-health">{item.health}/100</span></div><h3>{item.opportunity}</h3><div className="opportunity-product">{item.product} · {item.readiness}</div><p>{item.recommendation}</p><button className="opportunity-action" onClick={() => document.getElementById("campaigns")?.scrollIntoView({ behavior: "smooth" })}><Sparkles size={14} /> Create campaign</button></article>)}</div> : <div className="opportunity-empty"><Sparkles size={18} /><strong>Analyze your media to surface growth opportunities.</strong><span>PixelPilot will connect media signals to practical business actions.</span></div>}
+      </section>
+
+      <section className="workspace" id="media">
         <div className="section-heading"><div><div className="eyebrow">MEDIA INTELLIGENCE</div><h2>Make every asset work harder.</h2></div><button className="text-button">View media library <ArrowUpRight size={15} /></button></div>
         <div className="workspace-grid">
           <article className="panel media-panel">
@@ -191,15 +210,17 @@ export default function Home() {
           </article>
 
           <article className="panel insight-panel" id="copilot"><div className="panel-top"><div><h3>AI recommendations</h3><p>What PixelPilot sees right now</p></div><Zap size={19} /></div>
-            <div className="recommendation"><span className="priority high">HIGH</span><strong>5 products are campaign-ready</strong><p>Strong image quality and consistent branding detected.</p></div>
-            <div className="recommendation"><span className="priority medium">MEDIUM</span><strong>12 assets need optimization</strong><p>Generate social-ready variants before publishing.</p></div>
-            <div className="recommendation"><span className="priority opportunity">OPPORTUNITY</span><strong>Weekend promotion detected</strong><p>PixelPilot can prepare a campaign from your best assets.</p></div>
+            {analyzedAssets.length ? <>
+              <div className="recommendation"><span className="priority high">HIGH</span><strong>{readyAssets} campaign-ready {readyAssets === 1 ? "asset" : "assets"}</strong><p>{readyAssets ? "Strong media that PixelPilot can activate in your growth workflow." : "Analyze your media to identify campaign-ready assets."}</p></div>
+              <div className="recommendation"><span className="priority medium">MEDIUM</span><strong>{needsOptimization} {needsOptimization === 1 ? "asset needs" : "assets need"} optimization</strong><p>{needsOptimization ? "Generate platform-ready variants before publishing." : "No optimization blockers detected in the analyzed library."}</p></div>
+              <div className="recommendation"><span className="priority opportunity">OPPORTUNITY</span><strong>{opportunityCount} growth {opportunityCount === 1 ? "signal" : "signals"} discovered</strong><p>{opportunityCount ? "PixelPilot found practical actions inside your uploaded media." : "Upload and analyze more media to discover business opportunities."}</p></div>
+            </> : <div className="recommendation-empty"><Sparkles size={17} /><strong>Your AI recommendations will appear here.</strong><p>Upload media and PixelPilot will identify quality, readiness, issues, and growth opportunities.</p></div>}
             <div className="copilot-box"><div className="copilot-label">ASK YOUR BUSINESS COPILOT</div><textarea value={copilotQuestion} onChange={(e) => setCopilotQuestion(e.target.value)} placeholder="Ask about your uploaded media..." /><button className="copilot-button" onClick={askCopilot} disabled={copilotLoading}><BrainCircuit size={17} /> {copilotLoading ? "Thinking…" : "Ask PixelPilot"} <ArrowUpRight size={15} /></button>{copilotResult && <div className="copilot-result"><b>{copilotResult.answer}</b>{copilotResult.opportunity && <p><strong>Opportunity:</strong> {copilotResult.opportunity}</p>}{copilotResult.actions.length > 0 && <ol>{copilotResult.actions.map((action) => <li key={action}>{action}</li>)}</ol>}<small>Confidence: {copilotResult.confidence}</small></div>}</div>
           </article>
         </div>
       </section>
 
-      <section className="campaign-section" id="campaigns"><div className="eyebrow">AI CAMPAIGN GENERATOR</div><h2>Turn insights into a campaign.</h2><p className="campaign-intro">Select your goal, audience and platform. PixelPilot creates ready-to-use campaign copy from your analyzed Cloudinary media.</p><div className="campaign-grid"><div className="panel campaign-controls"><label>Campaign goal<select value={campaignGoal} onChange={(e) => setCampaignGoal(e.target.value)}><option>Product awareness</option><option>Lead generation</option><option>Developer adoption</option><option>Social engagement</option></select></label><label>Audience<input value={campaignAudience} onChange={(e) => setCampaignAudience(e.target.value)} /></label><label>Platform<select value={campaignPlatform} onChange={(e) => setCampaignPlatform(e.target.value)}><option>LinkedIn</option><option>Instagram</option><option>X</option><option>Developer community</option></select></label><button className="campaign-button" onClick={generateCampaign} disabled={campaignLoading || uploadedAssets.length === 0}><Sparkles size={16} /> {campaignLoading ? "Creating campaign…" : uploadedAssets.length ? "Generate Campaign" : "Upload media first"}</button></div><div className="panel campaign-output">{campaign ? (campaign.error ? <div className="campaign-error">{campaign.error}</div> : <><div className="campaign-name">{campaign.campaignName}</div><h3>{campaign.headline}</h3><div className="campaign-hook">{campaign.hook}</div><p>{campaign.body}</p><div className="campaign-cta">{campaign.cta}</div><div className="campaign-meta"><span>Audience: {campaign.audienceAngle}</span><span>#{campaign.hashtags?.join(" #")}</span></div><ul>{campaign.platformTips?.map((tip:string) => <li key={tip}>{tip}</li>)}</ul></>) : <div className="campaign-empty"><Sparkles size={22} /><strong>Your campaign will appear here</strong><span>Powered by your uploaded media intelligence.</span></div>}</div></div></section><section className="flow"><div className="eyebrow">THE PIXELPILOT LOOP</div><h2>From pixels to decisions.</h2><div className="flow-row">{["Upload","Understand","Optimize","Recommend","Create","Grow"].map((item, i) => <div className="flow-step" key={item}><span>0{i + 1}</span><strong>{item}</strong>{i < 5 && <ArrowUpRight size={14} />}</div>)}</div></section>
+      <section className="campaign-section" id="campaigns"><div className="eyebrow">AI CAMPAIGN GENERATOR</div><h2>Turn insights into a campaign.</h2><p className="campaign-intro">Select your goal, audience and platform. PixelPilot creates ready-to-use campaign copy from your analyzed Cloudinary media.</p><div className="campaign-grid"><div className="panel campaign-controls"><label>Campaign goal<select value={campaignGoal} onChange={(e) => setCampaignGoal(e.target.value)}><option>Product awareness</option><option>Lead generation</option><option>Developer adoption</option><option>Social engagement</option></select></label><label>Audience<input value={campaignAudience} onChange={(e) => setCampaignAudience(e.target.value)} /></label><label>Platform<select value={campaignPlatform} onChange={(e) => setCampaignPlatform(e.target.value)}><option>LinkedIn</option><option>Instagram</option><option>X</option><option>Developer community</option></select></label><button className="campaign-button" onClick={generateCampaign} disabled={campaignLoading || uploadedAssets.length === 0}><Sparkles size={16} /> {campaignLoading ? "Creating campaign…" : uploadedAssets.length ? "Generate Campaign" : "Upload media first"}</button></div><div className="panel campaign-output">{campaign ? (campaign.error ? <div className="campaign-error">{campaign.error}</div> : <><div className="campaign-name">{campaign.campaignName}</div><h3>{campaign.headline}</h3><div className="campaign-hook">{campaign.hook}</div><p>{campaign.body}</p><div className="campaign-cta">{campaign.cta}</div><div className="campaign-meta"><span>Audience: {campaign.audienceAngle}</span><span>#{campaign.hashtags?.join(" #")}</span></div><ul>{campaign.platformTips?.map((tip:string) => <li key={tip}>{tip}</li>)}</ul></>) : <div className="campaign-empty"><Sparkles size={22} /><strong>{uploadedAssets.length ? "Your campaign will appear here" : "Upload media to unlock campaign creation"}</strong><span>Powered by your uploaded media intelligence.</span></div>}</div></div></section><section className="flow"><div className="eyebrow">THE PIXELPILOT LOOP</div><h2>From pixels to decisions.</h2><div className="flow-row">{["Upload","Understand","Optimize","Recommend","Create","Grow"].map((item, i) => <div className="flow-step" key={item}><span>0{i + 1}</span><strong>{item}</strong>{i < 5 && <ArrowUpRight size={14} />}</div>)}</div></section>
       <footer><span>PixelPilot</span><span>AI-powered business media intelligence</span><span>Cloudinary-first architecture</span></footer>
     </main>
   );
