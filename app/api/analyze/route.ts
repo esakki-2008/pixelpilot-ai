@@ -97,9 +97,9 @@ Keep tags to at most 6 items, issues/opportunities to at most 3 items each.`;
             ],
           }],
           generationConfig: {
-            temperature: 0.2,
             responseMimeType: "application/json",
             responseSchema: schema,
+            thinkingConfig: { thinkingLevel: "low" },
           },
         }),
       },
@@ -108,7 +108,10 @@ Keep tags to at most 6 items, issues/opportunities to at most 3 items each.`;
     if (!aiResponse.ok) {
       const detail = await aiResponse.text();
       console.error("Gemini analysis failed:", detail);
-      return NextResponse.json({ error: "AI analysis failed. Check GEMINI_API_KEY and model access." }, { status: 502 });
+      return NextResponse.json({
+        error: "AI analysis failed.",
+        detail: process.env.NODE_ENV === "development" ? detail : undefined,
+      }, { status: 502 });
     }
 
     const payload = await aiResponse.json();
