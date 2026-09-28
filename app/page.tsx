@@ -126,6 +126,22 @@ export default function Home() {
     return matchesSearch && matchesFilter;
   });
 
+  const qualityCounts = ["Excellent", "Good", "Fair", "Poor"].map((quality) => ({
+    quality,
+    count: analyzedAssets.filter((asset) => asset.analysis?.quality === quality).length,
+  }));
+  const tagCounts = analyzedAssets.flatMap((asset) => asset.analysis?.tags ?? []).reduce<Record<string, number>>((counts, tag) => {
+    counts[tag] = (counts[tag] || 0) + 1;
+    return counts;
+  }, {});
+  const topTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const contentCoverage = analyzedAssets.length
+    ? Math.round((analyzedAssets.filter((asset) => (asset.analysis?.tags?.length ?? 0) > 0).length / analyzedAssets.length) * 100)
+    : 0;
+  const campaignUtilization = analyzedAssets.length
+    ? Math.round((analyzedAssets.filter((asset) => campaignHistory.some((item) => item.sourceAsset === asset.url)).length / analyzedAssets.length) * 100)
+    : 0;
+
   const growthOpportunities = analyzedAssets.flatMap((asset) =>
     (asset.analysis?.opportunities ?? []).map((opportunity) => ({
       product: asset.analysis?.product || "Uploaded product",
@@ -263,6 +279,21 @@ export default function Home() {
           <article className="signal-card"><div className="signal-number">{needsOptimization}</div><div><strong>Need optimization</strong><p>Media that can improve before publishing.</p></div></article>
           <article className="signal-card"><div className="signal-number">{opportunityCount}</div><div><strong>Growth signals</strong><p>AI opportunities discovered in your library.</p></div></article>
         </div>
+      </section>
+
+      <section className="business-insights" id="business-insights">
+        <div className="section-heading"><div><div className="eyebrow">BUSINESS INSIGHTS</div><h2>See the workspace at a glance.</h2></div><span className="overview-note">Evidence from your workspace</span></div>
+        <div className="insight-dashboard-grid">
+          <article className="insight-metric"><span>MEDIA HEALTH</span><strong>{analyzedAssets.length ? avgHealth : 0}<small>/100</small></strong><p>{analyzedAssets.length ? "Average AI health across analyzed media." : "Analyze media to establish a baseline."}</p></article>
+          <article className="insight-metric"><span>CAMPAIGN READINESS</span><strong>{analyzedAssets.length ? Math.round((readyAssets / analyzedAssets.length) * 100) : 0}<small>%</small></strong><p>{analyzedAssets.length ? `${readyAssets} of ${analyzedAssets.length} analyzed assets are ready.` : "Readiness appears after analysis."}</p></article>
+          <article className="insight-metric"><span>CONTENT COVERAGE</span><strong>{contentCoverage}<small>%</small></strong><p>Analyzed assets with AI-generated tags.</p></article>
+          <article className="insight-metric"><span>ASSET UTILIZATION</span><strong>{campaignUtilization}<small>%</small></strong><p>Analyzed assets referenced by saved campaigns.</p></article>
+        </div>
+        <div className="insight-panels">
+          <article className="panel insight-breakdown"><div className="panel-top"><div><h3>Quality distribution</h3><p>Current analyzed media mix</p></div><BarChart3 size={18}/></div>{qualityCounts.map((item)=><div className="quality-row" key={item.quality}><span>{item.quality}</span><div className="quality-track"><i style={{width:`${analyzedAssets.length ? (item.count/analyzedAssets.length)*100 : 0}%`}} /></div><strong>{item.count}</strong></div>)}</article>
+          <article className="panel insight-breakdown"><div className="panel-top"><div><h3>Intelligence coverage</h3><p>Most common signals in your media</p></div><Sparkles size={18}/></div>{topTags.length ? topTags.map(([tag,count])=><div className="tag-insight-row" key={tag}><span>#{tag}</span><strong>{count} asset{count===1?"":"s"}</strong></div>) : <div className="insight-no-data">Analyze more media to surface recurring tags and themes.</div>}</article>
+        </div>
+        <div className="insight-bottom"><div><span>OPTIMIZATION BACKLOG</span><strong>{needsOptimization} asset{needsOptimization===1?"":"s"} need attention</strong></div><div><span>GROWTH SIGNALS</span><strong>{opportunityCount} discovered</strong></div><div><span>SAVED CAMPAIGNS</span><strong>{campaignHistory.length}</strong></div></div>
       </section>
 
       <section className="growth-opportunities" id="growth-opportunities">
