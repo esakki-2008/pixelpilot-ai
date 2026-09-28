@@ -205,7 +205,7 @@ export default function Home() {
                   {asset.analysis && <div className="analysis-mini"><b>{asset.analysis.mediaHealth}/100 Media Health</b><span>{asset.analysis.product} · {asset.analysis.platformReadiness}</span><small>{asset.analysis.recommendation}</small></div>}
                   {asset.analysisError && <span className="analysis-error">{asset.analysisError}</span>}
                 </div>
-              )) : ["Product 01","Product 02","Product 03","Product 04","Product 05","Product 06"].map((name, i) => <div className="media-tile" key={name}><div className={"media-placeholder tone-" + (i + 1)}><ImageIcon size={25} /></div><span>{name}</span></div>)}
+              )) : <div className="media-empty"><ImageIcon size={24} /><strong>Your media library is ready.</strong><span>Upload product images or marketing assets to build your intelligence layer.</span></div>}
             </div>
           </article>
 
