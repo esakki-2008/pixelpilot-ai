@@ -339,7 +339,27 @@ export default function Home() {
 
       <section className="campaign-section" id="campaigns"><div className="eyebrow">AI CAMPAIGN GENERATOR</div><h2>Turn insights into a campaign.</h2><p className="campaign-intro">{selectedOpportunity ? <>Activating <strong>{selectedOpportunity.product}</strong>: {selectedOpportunity.opportunity}</> : <>Select your goal, audience and platform. PixelPilot creates ready-to-use campaign copy from your analyzed Cloudinary media.</>}</p><div className="campaign-grid"><div className="panel campaign-controls">
 {selectedOpportunity && <div className="campaign-context"><span>ACTIVE GROWTH SIGNAL</span><strong>{selectedOpportunity.opportunity}</strong><p>{selectedOpportunity.recommendation}</p><button type="button" onClick={() => setSelectedOpportunity(null)}>Clear signal</button></div>}
-<label>Campaign goal<select value={campaignGoal} onChange={(e) => setCampaignGoal(e.target.value)}><option>Product awareness</option><option>Lead generation</option><option>Developer adoption</option><option>Social engagement</option></select></label><label>Audience<input value={campaignAudience} onChange={(e) => setCampaignAudience(e.target.value)} /></label><label>Platform<select value={campaignPlatform} onChange={(e) => setCampaignPlatform(e.target.value)}><option>LinkedIn</option><option>Instagram</option><option>X</option><option>Developer community</option></select></label><button className="campaign-button" onClick={generateCampaign} disabled={campaignLoading || uploadedAssets.length === 0}><Sparkles size={16} /> {campaignLoading ? "Creating campaign…" : uploadedAssets.length ? "Generate Campaign" : "Upload media first"}</button></div><div className="panel campaign-output">{campaign ? (campaign.error ? <div className="campaign-error">{campaign.error}</div> : <><div className="campaign-name">{campaign.campaignName}</div><h3>{campaign.headline}</h3><div className="campaign-hook">{campaign.hook}</div><p>{campaign.body}</p><div className="campaign-cta">{campaign.cta}</div><div className="campaign-meta"><span>Audience: {campaign.audienceAngle}</span><span>#{campaign.hashtags?.join(" #")}</span></div><ul>{campaign.platformTips?.map((tip:string) => <li key={tip}>{tip}</li>)}</ul>
+<label>Campaign goal<select value={campaignGoal} onChange={(e) => setCampaignGoal(e.target.value)}><option>Product awareness</option><option>Lead generation</option><option>Developer adoption</option><option>Social engagement</option></select></label><label>Audience<input value={campaignAudience} onChange={(e) => setCampaignAudience(e.target.value)} /></label><label>Platform<select value={campaignPlatform} onChange={(e) => setCampaignPlatform(e.target.value)}><option>LinkedIn</option><option>Instagram</option><option>X</option><option>Developer community</option></select></label><button className="campaign-button" onClick={generateCampaign} disabled={campaignLoading || uploadedAssets.length === 0}><Sparkles size={16} /> {campaignLoading ? "Creating campaign…" : uploadedAssets.length ? "Generate Campaign" : "Upload media first"}</button></div><div className="panel campaign-output">{campaign ? (campaign.error ? <div className="campaign-error">{campaign.error}</div> : <><div className="campaign-name">{campaign.campaignName}</div><h3>{campaign.headline}</h3><div className="campaign-hook">{campaign.hook}</div><p>{campaign.body}</p><div className="campaign-cta">{campaign.cta}</div><div className="campaign-meta"><span>Audience: {campaign.audienceAngle}</span><span>#{campaign.hashtags?.join(" #")}</span></div><ul>{campaign.platformTips?.map((tip:string) => <li key={tip}>{tip}</li>)}
+{campaign.contentPackages && <div className="content-intelligence">
+  <div className="content-intelligence-head"><div><span>CONTENT INTELLIGENCE</span><strong>One campaign. Every channel.</strong><p>AI copy matched to each delivery format and your selected growth signal.</p></div><Sparkles size={15} /></div>
+  <div className="content-package-grid">
+    {[
+      ["Instagram", campaign.contentPackages.Instagram, "caption"],
+      ["Story", campaign.contentPackages.Story, "body"],
+      ["LinkedIn", campaign.contentPackages.LinkedIn, "post"],
+      ["Web", campaign.contentPackages.Web, "subheadline"],
+    ].map(([name, pack, bodyKey]) => {
+      const content = pack as any;
+      return <article className="content-package" key={String(name)}>
+        <div className="content-package-top"><span>{String(name).toUpperCase()}</span><button type="button" onClick={() => navigator.clipboard?.writeText(Object.values(content).filter((v) => Array.isArray(v) ? v.join(" ") : v).join("\n"))}>Copy</button></div>
+        <strong>{content.headline || content.caption || "Ready-to-use copy"}</strong>
+        <p>{content[bodyKey as string]}</p>
+        <div className="content-package-cta">{content.cta}</div>
+        {Array.isArray(content.hashtags) && <div className="content-hashtags">{content.hashtags.map((tag:string) => <span key={tag}>#{tag.replace(/^#/,"")}</span>)}</div>}
+      </article>;
+    })}
+  </div>
+</div>}</ul>
 {campaignAsset?.url && <div className="campaign-creatives">
   <div className="campaign-creatives-head"><div><span>CAMPAIGN CREATIVES</span><strong>Ready for {campaignPlatform}</strong><p>Optimized directly from your Cloudinary source asset.</p></div><Cloud size={15} /></div>
   <div className="campaign-creative-grid">
