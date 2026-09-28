@@ -44,6 +44,26 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("pixelpilot-campaigns-v1");
+      if (saved) setCampaignHistory(JSON.parse(saved));
+    } catch {
+      // Ignore malformed or unavailable browser storage.
+    } finally {
+      setCampaignHistoryHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!campaignHistoryHydrated) return;
+    try {
+      window.localStorage.setItem("pixelpilot-campaigns-v1", JSON.stringify(campaignHistory));
+    } catch {
+      // Ignore storage quota/privacy-mode errors.
+    }
+  }, [campaignHistory, campaignHistoryHydrated]);
+
+  useEffect(() => {
     if (!workspaceHydrated) return;
     try {
       window.localStorage.setItem("pixelpilot-assets-v1", JSON.stringify(uploadedAssets));
@@ -59,6 +79,8 @@ export default function Home() {
   const [campaignPlatform, setCampaignPlatform] = useState("LinkedIn");
   const [campaignLoading, setCampaignLoading] = useState(false);
   const [campaign, setCampaign] = useState<any>(null);
+  const [campaignHistory, setCampaignHistory] = useState<any[]>([]);
+  const [campaignHistoryHydrated, setCampaignHistoryHydrated] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<{ product: string; opportunity: string; recommendation: string } | null>(null);
 
   const cloudinaryVariant = (url: string, width: number, height: number) => url.replace("/upload/", `/upload/c_fill,w_${width},h_${height},q_auto,f_auto/`);
@@ -108,7 +130,21 @@ export default function Home() {
     try {
       const response = await fetch("/api/campaign", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ goal: campaignGoal, audience: campaignAudience, platform: campaignPlatform, assets: uploadedAssets, opportunity: selectedOpportunity }) });
       const data = await response.json();
-      setCampaign(data.campaign || { error: data.error || "Campaign generation failed." });
+      const generated = data.campaign || { error: data.error || "Campaign generation failed." };
+      setCampaign(generated);
+      if (generated && !generated.error) {
+        const savedCampaign = {
+          id: `campaign-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+          goal: campaignGoal,
+          audience: campaignAudience,
+          platform: campaignPlatform,
+          opportunity: selectedOpportunity,
+          sourceAsset: campaignAsset?.url || null,
+          campaign: generated,
+        };
+        setCampaignHistory((current) => [savedCampaign, ...current].slice(0, 12));
+      }
     } catch { setCampaign({ error: "Campaign request failed." }); }
     finally { setCampaignLoading(false); }
   };
@@ -280,6 +316,19 @@ export default function Home() {
             <div className="copilot-box"><div className="copilot-label">ASK YOUR BUSINESS COPILOT</div><textarea value={copilotQuestion} onChange={(e) => setCopilotQuestion(e.target.value)} placeholder="Ask about your uploaded media..." /><button className="copilot-button" onClick={askCopilot} disabled={copilotLoading}><BrainCircuit size={17} /> {copilotLoading ? "Thinking…" : "Ask PixelPilot"} <ArrowUpRight size={15} /></button>{copilotResult && <div className="copilot-result"><b>{copilotResult.answer}</b>{copilotResult.opportunity && <p><strong>Opportunity:</strong> {copilotResult.opportunity}</p>}{copilotResult.actions.length > 0 && <ol>{copilotResult.actions.map((action) => <li key={action}>{action}</li>)}</ol>}<small>Confidence: {copilotResult.confidence}</small></div>}</div>
           </article>
         </div>
+      </section>
+
+      <section className="campaign-history" id="campaign-history">
+        <div className="section-heading"><div><div className="eyebrow">CAMPAIGN HISTORY</div><h2>Keep every growth decision.</h2></div><span className="overview-note">{campaignHistory.length} saved</span></div>
+        {campaignHistory.length ? <div className="campaign-history-grid">{campaignHistory.map((item) => (
+          <article className="history-card" key={item.id}>
+            <div className="history-card-top"><span>{item.platform}</span><small>{new Date(item.createdAt).toLocaleDateString()}</small></div>
+            <h3>{item.campaign?.campaignName || "Untitled campaign"}</h3>
+            <p>{item.campaign?.headline || item.goal}</p>
+            {item.opportunity && <div className="history-signal"><Sparkles size={11} /> {item.opportunity.opportunity}</div>}
+            <div className="history-actions"><button onClick={() => { setCampaign(item.campaign); setCampaignGoal(item.goal); setCampaignAudience(item.audience); setCampaignPlatform(item.platform); setSelectedOpportunity(item.opportunity || null); document.getElementById("campaigns")?.scrollIntoView({ behavior: "smooth" }); }}>Reopen</button>{item.sourceAsset && <a href={item.sourceAsset} target="_blank" rel="noreferrer">Source asset <ArrowUpRight size={11} /></a>}</div>
+          </article>
+        ))}</div> : <div className="history-empty"><Sparkles size={18} /><strong>No campaigns saved yet.</strong><span>Generate a campaign and PixelPilot will keep it here for your next decision.</span></div>}
       </section>
 
       <section className="campaign-section" id="campaigns"><div className="eyebrow">AI CAMPAIGN GENERATOR</div><h2>Turn insights into a campaign.</h2><p className="campaign-intro">{selectedOpportunity ? <>Activating <strong>{selectedOpportunity.product}</strong>: {selectedOpportunity.opportunity}</> : <>Select your goal, audience and platform. PixelPilot creates ready-to-use campaign copy from your analyzed Cloudinary media.</>}</p><div className="campaign-grid"><div className="panel campaign-controls">
