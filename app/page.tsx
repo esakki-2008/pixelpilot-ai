@@ -53,6 +53,15 @@ export default function Home() {
   const readyAssets = analyzedAssets.filter((asset) => asset.analysis?.platformReadiness === "Ready").length;
   const opportunityCount = analyzedAssets.reduce((sum, asset) => sum + (asset.analysis?.opportunities?.length ?? 0), 0);
   const needsOptimization = analyzedAssets.filter((asset) => asset.analysis?.platformReadiness !== "Ready").length;
+  const growthOpportunities = analyzedAssets.flatMap((asset) =>
+    (asset.analysis?.opportunities ?? []).map((opportunity) => ({
+      product: asset.analysis?.product || "Uploaded product",
+      opportunity,
+      health: asset.analysis?.mediaHealth ?? 0,
+      readiness: asset.analysis?.platformReadiness || "Unknown",
+      recommendation: asset.analysis?.recommendation || "Review this asset and activate the strongest available channel.",
+    })),
+  ).slice(0, 6);
 
   const askCopilot = async () => {
     if (!copilotQuestion.trim() || copilotLoading) return;
@@ -162,7 +171,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="workspace" id="media">
+      <section className="growth-opportunities" id="growth-opportunities">\n        <div className="section-heading"><div><div className="eyebrow">GROWTH OPPORTUNITIES</div><h2>Turn signals into actions.</h2></div><span className="overview-note">{growthOpportunities.length} opportunities surfaced</span></div>\n        {growthOpportunities.length ? <div className="opportunity-grid">{growthOpportunities.map((item, index) => <article className="opportunity-card" key={item.product + item.opportunity + index}><div className="opportunity-top"><span className="priority opportunity">OPPORTUNITY</span><span className="opportunity-health">{item.health}/100</span></div><h3>{item.opportunity}</h3><div className="opportunity-product">{item.product} · {item.readiness}</div><p>{item.recommendation}</p><button className="opportunity-action" onClick={() => document.getElementById("campaigns")?.scrollIntoView({ behavior: "smooth" })}><Sparkles size={14} /> Create campaign</button></article>)}</div> : <div className="opportunity-empty"><Sparkles size={18} /><strong>Analyze your media to surface growth opportunities.</strong><span>PixelPilot will connect media signals to practical business actions.</span></div>}\n      </section>\n\n      <section className="workspace" id="media">
         <div className="section-heading"><div><div className="eyebrow">MEDIA INTELLIGENCE</div><h2>Make every asset work harder.</h2></div><button className="text-button">View media library <ArrowUpRight size={15} /></button></div>
         <div className="workspace-grid">
           <article className="panel media-panel">
