@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const prompt = `You are PixelPilot's AI Campaign Generator.
 Create a realistic marketing campaign using the provided media intelligence.
 Never invent product claims, prices, discounts, metrics, customers, or features. Use only information present in the media intelligence. If something is unknown, keep the wording generic.
-Return concise, ready-to-use copy.
+Return concise, ready-to-use copy. Also create platform-specific content packages for Instagram, Story, LinkedIn, and Web. Keep every claim grounded in the provided intelligence.
 
 Goal: ${String(goal || "product awareness").slice(0, 200)}
 Audience: ${String(audience || "general audience").slice(0, 150)}
@@ -45,9 +45,19 @@ ${JSON.stringify(intelligence)}`;
               cta: { type: "string" },
               hashtags: { type: "array", items: { type: "string" } },
               audienceAngle: { type: "string" },
-              platformTips: { type: "array", items: { type: "string" } }
+              platformTips: { type: "array", items: { type: "string" } },
+              contentPackages: {
+                type: "object",
+                properties: {
+                  Instagram: { type: "object", properties: { caption: { type: "string" }, cta: { type: "string" }, hashtags: { type: "array", items: { type: "string" } } }, required: ["caption","cta","hashtags"] },
+                  Story: { type: "object", properties: { headline: { type: "string" }, body: { type: "string" }, cta: { type: "string" } }, required: ["headline","body","cta"] },
+                  LinkedIn: { type: "object", properties: { headline: { type: "string" }, post: { type: "string" }, cta: { type: "string" } }, required: ["headline","post","cta"] },
+                  Web: { type: "object", properties: { headline: { type: "string" }, subheadline: { type: "string" }, cta: { type: "string" } }, required: ["headline","subheadline","cta"] }
+                },
+                required: ["Instagram","Story","LinkedIn","Web"]
+              }
             },
-            required: ["campaignName","hook","headline","body","cta","hashtags","audienceAngle","platformTips"]
+            required: ["campaignName","hook","headline","body","cta","hashtags","audienceAngle","platformTips","contentPackages"]
           },
           thinkingConfig: { thinkingBudget: 0 }
         }
