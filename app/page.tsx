@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUpRight, BarChart3, BrainCircuit, Cloud, ImageIcon, Menu, Sparkles, Upload, Zap } from "lucide-react";
+import CloudinaryUpload from "../components/cloudinary-upload";
+import { ArrowUpRight, BarChart3, BrainCircuit, Cloud, ImageIcon, Menu, Sparkles, Zap } from "lucide-react";
 
 const insights = [
   { label: "Media Health", value: "84%", note: "+12% this week", icon: BarChart3 },
@@ -12,6 +13,7 @@ const insights = [
 
 export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [uploadedAssets, setUploadedAssets] = useState<Array<{ url?: string; public_id?: string; format?: string }>>([]);
   return (
     <main className="shell">
       <header className="topbar">
@@ -27,7 +29,7 @@ export default function Home() {
           <div className="eyebrow"><span className="live-dot" /> AI BUSINESS COPILOT</div>
           <h1>Your media already contains <span>growth signals.</span></h1>
           <p>PixelPilot turns product images and marketing assets into actionable insights, optimized media, and smarter growth decisions.</p>
-          <div className="hero-actions"><button className="primary"><Upload size={17} /> Upload media <ArrowUpRight size={16} /></button><button className="secondary"><BrainCircuit size={17} /> Ask PixelPilot</button></div>
+          <div className="hero-actions"><CloudinaryUpload onUploaded={(asset) => setUploadedAssets((current) => [...current, asset])} /><button className="secondary"><BrainCircuit size={17} /> Ask PixelPilot</button></div>
         </div>
         <div className="hero-orbit"><div className="orbit-ring ring-one" /><div className="orbit-ring ring-two" /><div className="orbit-core"><Sparkles size={30} /></div><div className="orbit-pill pill-a">Analyze</div><div className="orbit-pill pill-b">Optimize</div><div className="orbit-pill pill-c">Grow</div></div>
       </section>
@@ -37,7 +39,7 @@ export default function Home() {
       <section className="workspace" id="media">
         <div className="section-heading"><div><div className="eyebrow">MEDIA INTELLIGENCE</div><h2>Make every asset work harder.</h2></div><button className="text-button">View media library <ArrowUpRight size={15} /></button></div>
         <div className="workspace-grid">
-          <article className="panel media-panel"><div className="panel-top"><div><h3>Recent media</h3><p>Managed and delivered through Cloudinary</p></div><span className="status"><span /> Live</span></div><div className="media-grid">{["Product 01","Product 02","Product 03","Product 04","Product 05","Product 06"].map((name, i) => <div className="media-tile" key={name}><div className={"media-placeholder tone-" + (i + 1)}><ImageIcon size={25} /></div><span>{name}</span></div>)}</div></article>
+          <article className="panel media-panel"><div className="panel-top"><div><h3>Recent media</h3><p>Managed and delivered through Cloudinary</p></div><span className="status"><span /> Live</span></div><div className="media-grid">{uploadedAssets.length ? uploadedAssets.map((asset, i) => <div className="media-tile" key={asset.public_id ?? i}><img className="uploaded-media" src={asset.url} alt={asset.public_id ?? "Uploaded asset"} /><span>{asset.public_id?.split("/").pop() ?? "Uploaded asset"}</span></div>) : ["Product 01","Product 02","Product 03","Product 04","Product 05","Product 06"].map((name, i) => <div className="media-tile" key={name}><div className={"media-placeholder tone-" + (i + 1)}><ImageIcon size={25} /></div><span>{name}</span></div>)}</div></article>
           <article className="panel insight-panel"><div className="panel-top"><div><h3>AI recommendations</h3><p>What PixelPilot sees right now</p></div><Zap size={19} /></div>
             <div className="recommendation"><span className="priority high">HIGH</span><strong>5 products are campaign-ready</strong><p>Strong image quality and consistent branding detected.</p></div>
             <div className="recommendation"><span className="priority medium">MEDIUM</span><strong>12 assets need optimization</strong><p>Generate social-ready variants before publishing.</p></div>
