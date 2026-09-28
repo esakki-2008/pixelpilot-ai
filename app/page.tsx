@@ -29,6 +29,7 @@ type Asset = {
 export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [uploadedAssets, setUploadedAssets] = useState<Asset[]>([]);
+  const [selectedAssetKey, setSelectedAssetKey] = useState<string | null>(null);
   const [workspaceHydrated, setWorkspaceHydrated] = useState(false);
 
   useEffect(() => {
@@ -67,6 +68,7 @@ export default function Home() {
   const readyAssets = analyzedAssets.filter((asset) => asset.analysis?.platformReadiness === "Ready").length;
   const opportunityCount = analyzedAssets.reduce((sum, asset) => sum + (asset.analysis?.opportunities?.length ?? 0), 0);
   const issueCount = analyzedAssets.reduce((sum, asset) => sum + (asset.analysis?.issues?.length ?? 0), 0);
+  const selectedAsset = uploadedAssets.find((asset) => (asset.public_id || asset.url) === selectedAssetKey);
   const needsOptimization = analyzedAssets.filter((asset) => asset.analysis?.platformReadiness !== "Ready").length;
   const growthOpportunities = analyzedAssets.flatMap((asset) =>
     (asset.analysis?.opportunities ?? []).map((opportunity) => ({
@@ -199,8 +201,10 @@ export default function Home() {
             <div className="media-grid">
               {uploadedAssets.length ? uploadedAssets.map((asset, i) => (
                 <div className="media-tile" key={asset.public_id ?? i}>
-                  <img className="uploaded-media" src={asset.url} alt={asset.public_id ?? "Uploaded asset"} />
-                  <span>{asset.public_id?.split("/").pop() ?? "Uploaded asset"}</span>
+                  <button className="media-preview-button" onClick={() => setSelectedAssetKey(asset.public_id || asset.url || null)} aria-label={`Open intelligence for ${asset.analysis?.product || "uploaded asset"}`}>
+                    <img className="uploaded-media" src={asset.url} alt={asset.public_id ?? "Uploaded asset"} />
+                  </button>
+                  <div className="media-name-row"><span>{asset.public_id?.split("/").pop() ?? "Uploaded asset"}</span>{asset.analysis && <button className="inspect-button" onClick={() => setSelectedAssetKey(asset.public_id || asset.url || null)}>Inspect</button>}</div>
                   {asset.url && <div className="optimization-box"><div className="optimization-title"><WandSparkles size={12} /> Cloudinary Optimizer</div><div className="variant-row"><a href={cloudinaryVariant(asset.url, 1080, 1080)} target="_blank" rel="noreferrer">Instagram</a><a href={cloudinaryVariant(asset.url, 1080, 1920)} target="_blank" rel="noreferrer">Story</a><a href={cloudinaryVariant(asset.url, 1200, 627)} target="_blank" rel="noreferrer">LinkedIn</a><a href={cloudinaryVariant(asset.url, 1600, 900)} target="_blank" rel="noreferrer">Web</a></div></div>}
                   {asset.analyzing && <span className="analysis-loading">Analyzing with AI…</span>}
                   {asset.analysis && <div className="analysis-mini"><b>{asset.analysis.mediaHealth}/100 Media Health</b><span>{asset.analysis.product} · {asset.analysis.platformReadiness}</span><small>{asset.analysis.recommendation}</small></div>}
@@ -209,6 +213,32 @@ export default function Home() {
               )) : <div className="media-empty"><ImageIcon size={24} /><strong>Your media library is ready.</strong><span>Upload product images or marketing assets to build your intelligence layer.</span></div>}
             </div>
           </article>
+
+          {selectedAsset?.analysis && (
+            <div className="asset-intelligence">
+              <div className="asset-intelligence-head">
+                <div>
+                  <div className="eyebrow">ASSET INTELLIGENCE</div>
+                  <h3>{selectedAsset.analysis.product}</h3>
+                  <span>{selectedAsset.analysis.category} · {selectedAsset.analysis.quality} · {selectedAsset.analysis.platformReadiness}</span>
+                </div>
+                <button className="close-inspector" onClick={() => setSelectedAssetKey(null)} aria-label="Close asset intelligence">×</button>
+              </div>
+              <div className="asset-intelligence-grid">
+                <div className="asset-score"><strong>{selectedAsset.analysis.mediaHealth}</strong><span>Media Health</span></div>
+                <div className="asset-detail"><span>SUMMARY</span><p>{selectedAsset.analysis.summary}</p></div>
+              </div>
+              <div className="asset-detail-section">
+                <span>TAGS</span>
+                <div className="tag-list">{selectedAsset.analysis.tags?.map((tag) => <span key={tag}>{tag}</span>)}</div>
+              </div>
+              <div className="asset-detail-columns">
+                <div className="asset-detail-section"><span>ISSUES</span>{selectedAsset.analysis.issues?.length ? <ul>{selectedAsset.analysis.issues.map((issue) => <li key={issue}>{issue}</li>)}</ul> : <p className="clean-state">No issues detected.</p>}</div>
+                <div className="asset-detail-section"><span>OPPORTUNITIES</span>{selectedAsset.analysis.opportunities?.length ? <ul>{selectedAsset.analysis.opportunities.map((opportunity) => <li key={opportunity}>{opportunity}</li>)}</ul> : <p className="clean-state">No growth signals yet.</p>}</div>
+              </div>
+              <div className="asset-recommendation"><span>RECOMMENDATION</span><p>{selectedAsset.analysis.recommendation}</p></div>
+            </div>
+          )}
 
           <article className="panel insight-panel" id="copilot"><div className="panel-top"><div><h3>AI recommendations</h3><p>What PixelPilot sees right now</p></div><Zap size={19} /></div>
             {analyzedAssets.length ? <>
