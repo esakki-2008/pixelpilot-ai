@@ -70,6 +70,9 @@ export default function Home() {
   const opportunityCount = analyzedAssets.reduce((sum, asset) => sum + (asset.analysis?.opportunities?.length ?? 0), 0);
   const issueCount = analyzedAssets.reduce((sum, asset) => sum + (asset.analysis?.issues?.length ?? 0), 0);
   const selectedAsset = uploadedAssets.find((asset) => (asset.public_id || asset.url) === selectedAssetKey);
+  const campaignAsset = selectedOpportunity
+    ? analyzedAssets.find((asset) => asset.analysis?.product === selectedOpportunity.product && asset.url) || analyzedAssets.find((asset) => asset.url)
+    : analyzedAssets.find((asset) => asset.url);
   const needsOptimization = analyzedAssets.filter((asset) => asset.analysis?.platformReadiness !== "Ready").length;
   const growthOpportunities = analyzedAssets.flatMap((asset) =>
     (asset.analysis?.opportunities ?? []).map((opportunity) => ({
@@ -281,7 +284,24 @@ export default function Home() {
 
       <section className="campaign-section" id="campaigns"><div className="eyebrow">AI CAMPAIGN GENERATOR</div><h2>Turn insights into a campaign.</h2><p className="campaign-intro">{selectedOpportunity ? <>Activating <strong>{selectedOpportunity.product}</strong>: {selectedOpportunity.opportunity}</> : <>Select your goal, audience and platform. PixelPilot creates ready-to-use campaign copy from your analyzed Cloudinary media.</>}</p><div className="campaign-grid"><div className="panel campaign-controls">
 {selectedOpportunity && <div className="campaign-context"><span>ACTIVE GROWTH SIGNAL</span><strong>{selectedOpportunity.opportunity}</strong><p>{selectedOpportunity.recommendation}</p><button type="button" onClick={() => setSelectedOpportunity(null)}>Clear signal</button></div>}
-<label>Campaign goal<select value={campaignGoal} onChange={(e) => setCampaignGoal(e.target.value)}><option>Product awareness</option><option>Lead generation</option><option>Developer adoption</option><option>Social engagement</option></select></label><label>Audience<input value={campaignAudience} onChange={(e) => setCampaignAudience(e.target.value)} /></label><label>Platform<select value={campaignPlatform} onChange={(e) => setCampaignPlatform(e.target.value)}><option>LinkedIn</option><option>Instagram</option><option>X</option><option>Developer community</option></select></label><button className="campaign-button" onClick={generateCampaign} disabled={campaignLoading || uploadedAssets.length === 0}><Sparkles size={16} /> {campaignLoading ? "Creating campaign…" : uploadedAssets.length ? "Generate Campaign" : "Upload media first"}</button></div><div className="panel campaign-output">{campaign ? (campaign.error ? <div className="campaign-error">{campaign.error}</div> : <><div className="campaign-name">{campaign.campaignName}</div><h3>{campaign.headline}</h3><div className="campaign-hook">{campaign.hook}</div><p>{campaign.body}</p><div className="campaign-cta">{campaign.cta}</div><div className="campaign-meta"><span>Audience: {campaign.audienceAngle}</span><span>#{campaign.hashtags?.join(" #")}</span></div><ul>{campaign.platformTips?.map((tip:string) => <li key={tip}>{tip}</li>)}</ul></>) : <div className="campaign-empty"><Sparkles size={22} /><strong>{uploadedAssets.length ? "Your campaign will appear here" : "Upload media to unlock campaign creation"}</strong><span>Powered by your uploaded media intelligence.</span></div>}</div></div></section><section className="flow"><div className="eyebrow">THE PIXELPILOT LOOP</div><h2>From pixels to decisions.</h2><div className="flow-row">{["Upload","Understand","Optimize","Recommend","Create","Grow"].map((item, i) => <div className="flow-step" key={item}><span>0{i + 1}</span><strong>{item}</strong>{i < 5 && <ArrowUpRight size={14} />}</div>)}</div></section>
+<label>Campaign goal<select value={campaignGoal} onChange={(e) => setCampaignGoal(e.target.value)}><option>Product awareness</option><option>Lead generation</option><option>Developer adoption</option><option>Social engagement</option></select></label><label>Audience<input value={campaignAudience} onChange={(e) => setCampaignAudience(e.target.value)} /></label><label>Platform<select value={campaignPlatform} onChange={(e) => setCampaignPlatform(e.target.value)}><option>LinkedIn</option><option>Instagram</option><option>X</option><option>Developer community</option></select></label><button className="campaign-button" onClick={generateCampaign} disabled={campaignLoading || uploadedAssets.length === 0}><Sparkles size={16} /> {campaignLoading ? "Creating campaign…" : uploadedAssets.length ? "Generate Campaign" : "Upload media first"}</button></div><div className="panel campaign-output">{campaign ? (campaign.error ? <div className="campaign-error">{campaign.error}</div> : <><div className="campaign-name">{campaign.campaignName}</div><h3>{campaign.headline}</h3><div className="campaign-hook">{campaign.hook}</div><p>{campaign.body}</p><div className="campaign-cta">{campaign.cta}</div><div className="campaign-meta"><span>Audience: {campaign.audienceAngle}</span><span>#{campaign.hashtags?.join(" #")}</span></div><ul>{campaign.platformTips?.map((tip:string) => <li key={tip}>{tip}</li>)}</ul>
+{campaignAsset?.url && <div className="campaign-creatives">
+  <div className="campaign-creatives-head"><div><span>CAMPAIGN CREATIVES</span><strong>Ready for {campaignPlatform}</strong><p>Optimized directly from your Cloudinary source asset.</p></div><Cloud size={15} /></div>
+  <div className="campaign-creative-grid">
+    {[
+      ["Instagram", "1080 × 1080", 1080, 1080],
+      ["Story", "1080 × 1920", 1080, 1920],
+      ["LinkedIn", "1200 × 627", 1200, 627],
+      ["Web", "1600 × 900", 1600, 900],
+    ].map(([name, dimensions, width, height]) => {
+      const creativeUrl = cloudinaryVariant(campaignAsset.url!, Number(width), Number(height));
+      return <article className="campaign-creative" key={String(name)}>
+        <img src={creativeUrl} alt={`${name} campaign creative`} />
+        <div><strong>{name}</strong><span>{dimensions}</span><a href={creativeUrl} target="_blank" rel="noreferrer">Use creative <ArrowUpRight size={11} /></a></div>
+      </article>;
+    })}
+  </div>
+</div>}</>) : <div className="campaign-empty"><Sparkles size={22} /><strong>{uploadedAssets.length ? "Your campaign will appear here" : "Upload media to unlock campaign creation"}</strong><span>Powered by your uploaded media intelligence.</span></div>}</div></div></section><section className="flow"><div className="eyebrow">THE PIXELPILOT LOOP</div><h2>From pixels to decisions.</h2><div className="flow-row">{["Upload","Understand","Optimize","Recommend","Create","Grow"].map((item, i) => <div className="flow-step" key={item}><span>0{i + 1}</span><strong>{item}</strong>{i < 5 && <ArrowUpRight size={14} />}</div>)}</div></section>
       <footer><span>PixelPilot</span><span>AI-powered business media intelligence</span><span>Cloudinary-first architecture</span></footer>
     </main>
   );
