@@ -47,6 +47,7 @@ export default function Home() {
   }, [toast]);
 
 
+  useEffect(() => {
     try {
       const saved = window.localStorage.getItem("pixelpilot-assets-v1");
       if (saved) setUploadedAssets(JSON.parse(saved));
