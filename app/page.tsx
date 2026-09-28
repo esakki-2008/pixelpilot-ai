@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import CloudinaryUpload from "../components/cloudinary-upload";
-import { ArrowUpRight, BarChart3, BrainCircuit, Cloud, ImageIcon, Menu, Sparkles, Zap } from "lucide-react";
+import { ArrowUpRight, BarChart3, BrainCircuit, Cloud, ImageIcon, Menu, Sparkles, Zap, WandSparkles } from "lucide-react";
 
 type Asset = {
   url?: string;
@@ -36,6 +36,8 @@ const insights = [
 export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [uploadedAssets, setUploadedAssets] = useState<Asset[]>([]);
+
+  const cloudinaryVariant = (url: string, width: number, height: number) => url.replace("/upload/", `/upload/c_fill,w_${width},h_${height},q_auto,f_auto/`);
 
   const handleUploaded = async (asset: Asset & { secure_url?: string }) => {
     const index = uploadedAssets.length;
@@ -105,6 +107,7 @@ export default function Home() {
                 <div className="media-tile" key={asset.public_id ?? i}>
                   <img className="uploaded-media" src={asset.url} alt={asset.public_id ?? "Uploaded asset"} />
                   <span>{asset.public_id?.split("/").pop() ?? "Uploaded asset"}</span>
+                  {asset.url && <div className="optimization-box"><div className="optimization-title"><WandSparkles size={12} /> Cloudinary Optimizer</div><div className="variant-row"><a href={cloudinaryVariant(asset.url, 1080, 1080)} target="_blank" rel="noreferrer">Instagram</a><a href={cloudinaryVariant(asset.url, 1080, 1920)} target="_blank" rel="noreferrer">Story</a><a href={cloudinaryVariant(asset.url, 1200, 627)} target="_blank" rel="noreferrer">LinkedIn</a><a href={cloudinaryVariant(asset.url, 1600, 900)} target="_blank" rel="noreferrer">Web</a></div></div>}
                   {asset.analyzing && <span className="analysis-loading">Analyzing with AI…</span>}
                   {asset.analysis && <div className="analysis-mini"><b>{asset.analysis.mediaHealth}/100 Media Health</b><span>{asset.analysis.product} · {asset.analysis.platformReadiness}</span><small>{asset.analysis.recommendation}</small></div>}
                   {asset.analysisError && <span className="analysis-error">{asset.analysisError}</span>}
