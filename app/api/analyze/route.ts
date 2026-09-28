@@ -82,7 +82,7 @@ Keep tags to at most 6 items, issues/opportunities to at most 3 items each.`;
     };
 
     const aiResponse = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
       {
         method: "POST",
         headers: {
@@ -99,7 +99,7 @@ Keep tags to at most 6 items, issues/opportunities to at most 3 items each.`;
           generationConfig: {
             responseMimeType: "application/json",
             responseSchema: schema,
-            thinkingConfig: { thinkingLevel: "low" },
+            thinkingConfig: { thinkingBudget: 0 },
           },
         }),
       },
@@ -110,7 +110,7 @@ Keep tags to at most 6 items, issues/opportunities to at most 3 items each.`;
       console.error("Gemini analysis failed:", detail);
       return NextResponse.json({
         error: "AI analysis failed.",
-        detail: process.env.NODE_ENV === "development" ? detail : undefined,
+        detail: detail.slice(0, 500),
       }, { status: 502 });
     }
 
