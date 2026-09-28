@@ -46,6 +46,13 @@ export default function Home() {
   const [campaign, setCampaign] = useState<any>(null);
 
   const cloudinaryVariant = (url: string, width: number, height: number) => url.replace("/upload/", `/upload/c_fill,w_${width},h_${height},q_auto,f_auto/`);
+  const analyzedAssets = uploadedAssets.filter((asset) => asset.analysis);
+  const avgHealth = analyzedAssets.length
+    ? Math.round(analyzedAssets.reduce((sum, asset) => sum + (asset.analysis?.mediaHealth ?? 0), 0) / analyzedAssets.length)
+    : 0;
+  const readyAssets = analyzedAssets.filter((asset) => asset.analysis?.platformReadiness === "Ready").length;
+  const opportunityCount = analyzedAssets.reduce((sum, asset) => sum + (asset.analysis?.opportunities?.length ?? 0), 0);
+  const needsOptimization = analyzedAssets.filter((asset) => asset.analysis?.platformReadiness !== "Ready").length;
 
   const askCopilot = async () => {
     if (!copilotQuestion.trim() || copilotLoading) return;
@@ -108,9 +115,14 @@ export default function Home() {
         <div className="brand"><div className="brand-mark"><Sparkles size={18} /></div><div><div className="brand-name">PixelPilot</div><div className="brand-tag">Turn media into business momentum.</div></div></div>
         <button className="mobile-menu" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu"><Menu /></button>
         <nav className={mobileOpen ? "nav open" : "nav"}>
-          <a href="#dashboard">Dashboard</a><a href="#media">Media</a><a href="#insights">AI Insights</a><a href="#campaigns">Campaigns</a><button className="profile">ES</button>
+          <a href="#dashboard">Overview</a><a href="#media">Media Library</a><a href="#insights">Intelligence</a><a href="#campaigns">Growth</a><button className="profile">ES</button>
         </nav>
       </header>
+
+      <section className="business-strip">
+        <div><span className="business-kicker">WORKSPACE</span><strong>EsakkiAI</strong><span className="business-status"><i /> Growth workspace active</span></div>
+        <div className="business-meta"><span>Business Copilot</span><span>Cloudinary connected</span><span>AI intelligence live</span></div>
+      </section>
 
       <section className="hero" id="dashboard">
         <div className="hero-copy">
@@ -125,7 +137,30 @@ export default function Home() {
         <div className="hero-orbit"><div className="orbit-ring ring-one" /><div className="orbit-ring ring-two" /><div className="orbit-core"><Sparkles size={30} /></div><div className="orbit-pill pill-a">Analyze</div><div className="orbit-pill pill-b">Optimize</div><div className="orbit-pill pill-c">Grow</div></div>
       </section>
 
-      <section className="stats" id="insights">{insights.map(({ label, value, note, icon: Icon }) => <article className="stat-card" key={label}><div className="stat-icon"><Icon size={18} /></div><div><div className="stat-label">{label}</div><div className="stat-value">{value}</div><div className="stat-note">{note}</div></div></article>)}</section>
+      <section className="stats" id="insights">
+        <article className="stat-card"><div className="stat-icon"><BarChart3 size={18} /></div><div><div className="stat-label">Media Health</div><div className="stat-value">{analyzedAssets.length ? `${avgHealth}%` : "—"}</div><div className="stat-note">{analyzedAssets.length ? `${analyzedAssets.length} analyzed assets` : "Upload assets to measure"}</div></div></article>
+        <article className="stat-card"><div className="stat-icon"><ImageIcon size={18} /></div><div><div className="stat-label">Media Assets</div><div className="stat-value">{uploadedAssets.length || "—"}</div><div className="stat-note">{uploadedAssets.length ? `${readyAssets} campaign-ready` : "Cloudinary library"}</div></div></article>
+        <article className="stat-card"><div className="stat-icon"><Sparkles size={18} /></div><div><div className="stat-label">AI Opportunities</div><div className="stat-value">{opportunityCount || "—"}</div><div className="stat-note">{opportunityCount ? "Detected from your media" : "Waiting for intelligence"}</div></div></article>
+        <article className="stat-card"><div className="stat-icon"><Cloud size={18} /></div><div><div className="stat-label">Optimization Queue</div><div className="stat-value">{analyzedAssets.length ? needsOptimization : "—"}</div><div className="stat-note">{analyzedAssets.length ? "Assets needing attention" : "Cloudinary transforms ready"}</div></div></article>
+      </section>
+
+      <section className="business-overview">
+        <div className="section-heading"><div><div className="eyebrow">BUSINESS OVERVIEW</div><h2>Know what deserves attention.</h2></div><span className="overview-note">Live from your workspace</span></div>
+        <div className="overview-grid">
+          <article className="overview-card overview-health"><div className="overview-top"><span>Portfolio health</span><strong>{analyzedAssets.length ? `${avgHealth}/100` : "—"}</strong></div><div className="health-track"><span style={{ width: `${avgHealth}%` }} /></div><p>{analyzedAssets.length ? "Based on AI analysis across your uploaded media." : "Upload product media to build your business intelligence layer."}</p></article>
+          <article className="overview-card"><span>Campaign readiness</span><strong>{analyzedAssets.length ? `${readyAssets} ready` : "No data yet"}</strong><p>{analyzedAssets.length ? "Products with media ready for immediate activation." : "PixelPilot will identify campaign-ready assets."}</p></article>
+          <article className="overview-card"><span>Next action</span><strong>{analyzedAssets.length ? (needsOptimization ? "Optimize media" : "Launch a campaign") : "Connect your media"}</strong><p>{analyzedAssets.length ? (needsOptimization ? "Generate platform-specific variants for assets that need work." : "Your analyzed library is ready for the growth workflow.") : "Start by uploading your product images or marketing assets."}</p></article>
+        </div>
+      </section>
+
+      <section className="product-intelligence">
+        <div className="section-heading"><div><div className="eyebrow">PRODUCT INTELLIGENCE</div><h2>From media to business signals.</h2></div><span className="overview-note">{analyzedAssets.length} products understood</span></div>
+        <div className="signal-grid">
+          <article className="signal-card"><div className="signal-number">{readyAssets || "—"}</div><div><strong>Campaign-ready</strong><p>Strong assets PixelPilot can activate now.</p></div></article>
+          <article className="signal-card"><div className="signal-number">{needsOptimization || "—"}</div><div><strong>Need optimization</strong><p>Media that can improve before publishing.</p></div></article>
+          <article className="signal-card"><div className="signal-number">{opportunityCount || "—"}</div><div><strong>Growth signals</strong><p>AI opportunities discovered in your library.</p></div></article>
+        </div>
+      </section>
 
       <section className="workspace" id="media">
         <div className="section-heading"><div><div className="eyebrow">MEDIA INTELLIGENCE</div><h2>Make every asset work harder.</h2></div><button className="text-button">View media library <ArrowUpRight size={15} /></button></div>
