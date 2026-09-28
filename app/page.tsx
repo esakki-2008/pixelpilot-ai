@@ -142,6 +142,32 @@ export default function Home() {
     ? Math.round((analyzedAssets.filter((asset) => campaignHistory.some((item) => item.sourceAsset === asset.url)).length / analyzedAssets.length) * 100)
     : 0;
 
+  const actionItems = [
+    ...analyzedAssets.flatMap((asset) => {
+      const key = asset.public_id || asset.url;
+      const product = asset.analysis?.product || "Uploaded asset";
+      const health = asset.analysis?.mediaHealth ?? 0;
+      return (asset.analysis?.issues ?? []).slice(0, 2).map((issue) => ({
+        id: `issue-${key}-${issue}`,
+        type: "Fix media",
+        title: issue,
+        product,
+        reason: `This asset is currently scored at ${health}/100 media health.`,
+        action: "Inspect asset",
+        key,
+      }));
+    }),
+    ...growthOpportunities.map((item, index) => ({
+      id: `growth-${index}-${item.product}-${item.opportunity}`,
+      type: "Growth opportunity",
+      title: item.opportunity,
+      product: item.product,
+      reason: item.recommendation,
+      action: "Create campaign",
+      opportunity: item,
+    })),
+  ].slice(0, 8);
+
   const growthOpportunities = analyzedAssets.flatMap((asset) =>
     (asset.analysis?.opportunities ?? []).map((opportunity) => ({
       product: asset.analysis?.product || "Uploaded product",
@@ -294,6 +320,23 @@ export default function Home() {
           <article className="panel insight-breakdown"><div className="panel-top"><div><h3>Intelligence coverage</h3><p>Most common signals in your media</p></div><Sparkles size={18}/></div>{topTags.length ? topTags.map(([tag,count])=><div className="tag-insight-row" key={tag}><span>#{tag}</span><strong>{count} asset{count===1?"":"s"}</strong></div>) : <div className="insight-no-data">Analyze more media to surface recurring tags and themes.</div>}</article>
         </div>
         <div className="insight-bottom"><div><span>OPTIMIZATION BACKLOG</span><strong>{needsOptimization} asset{needsOptimization===1?"":"s"} need attention</strong></div><div><span>GROWTH SIGNALS</span><strong>{opportunityCount} discovered</strong></div><div><span>SAVED CAMPAIGNS</span><strong>{campaignHistory.length}</strong></div></div>
+      </section>
+
+      <section className="action-center" id="action-center">
+        <div className="section-heading"><div><div className="eyebrow">AI ACTION CENTER</div><h2>Turn intelligence into action.</h2></div><span className="overview-note">{actionItems.length} actions ready</span></div>
+        {actionItems.length ? <div className="action-list">{actionItems.map((item) => <article className="action-card" key={item.id}>
+          <div className="action-card-main"><div className="action-type">{item.type}</div><h3>{item.title}</h3><p className="action-product">{item.product}</p>
+            <div className="action-reason"><span>WHY IT MATTERS</span><p>{item.reason}</p></div>
+          </div>
+          <button className="primary-button action-execute" onClick={() => {
+            if ("opportunity" in item && item.opportunity) {
+              activateOpportunity(item.opportunity);
+            } else if (item.key) {
+              setSelectedAssetKey(item.key);
+              document.getElementById("media-library")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }}>{item.action}<ArrowUpRight size={14}/></button>
+        </article>)}</div> : <div className="empty-state action-empty"><Sparkles size={20}/><h3>No actions yet</h3><p>Analyze your media to let PixelPilot identify issues and growth actions.</p></div>}
       </section>
 
       <section className="growth-opportunities" id="growth-opportunities">
