@@ -155,6 +155,16 @@ export default function Home() {
     ? Math.round((analyzedAssets.filter((asset) => campaignHistory.some((item) => item.sourceAsset === asset.url)).length / analyzedAssets.length) * 100)
     : 0;
 
+const growthOpportunities = analyzedAssets.flatMap((asset) =>
+    (asset.analysis?.opportunities ?? []).map((opportunity) => ({
+      product: asset.analysis?.product || "Uploaded product",
+      opportunity,
+      health: asset.analysis?.mediaHealth ?? 0,
+      readiness: asset.analysis?.platformReadiness || "Unknown",
+      recommendation: asset.analysis?.recommendation || "Review this asset and activate the strongest available channel.",
+    })),
+  ).slice(0, 6);
+
   const actionItems = [
     ...analyzedAssets.flatMap((asset) => {
       const key = asset.public_id || asset.url;
@@ -180,17 +190,6 @@ export default function Home() {
       opportunity: item,
     })),
   ].slice(0, 8);
-
-
-  const growthOpportunities = analyzedAssets.flatMap((asset) =>
-    (asset.analysis?.opportunities ?? []).map((opportunity) => ({
-      product: asset.analysis?.product || "Uploaded product",
-      opportunity,
-      health: asset.analysis?.mediaHealth ?? 0,
-      readiness: asset.analysis?.platformReadiness || "Unknown",
-      recommendation: asset.analysis?.recommendation || "Review this asset and activate the strongest available channel.",
-    })),
-  ).slice(0, 6);
 
   const askCopilot = async () => {
     if (!copilotQuestion.trim() || copilotLoading) return;
