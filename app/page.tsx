@@ -345,7 +345,7 @@ const growthOpportunities = analyzedAssets.flatMap((asset) =>
           <button className="primary-button action-execute" onClick={() => {
             if ("opportunity" in item && item.opportunity) {
               activateOpportunity(item.opportunity);
-            } else if (item.key) {
+            } else if ("key" in item && item.key) {
               setSelectedAssetKey(item.key);
               document.getElementById("media-library")?.scrollIntoView({ behavior: "smooth", block: "start" });
             }
