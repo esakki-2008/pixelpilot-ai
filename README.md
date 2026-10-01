@@ -151,7 +151,7 @@ Recommended product walkthrough:
 ## Submission assets
 
 HackIndia final submission form: https://forms.gle/GtukHAhcua6fviicA  
-Code freeze: **October 4, 2026 · 00:15 IST**. The final submission must include the public GitHub repository, live demo, 2–4 minute demo video, LinkedIn and X project-post links, team details, and confirmation of the mandatory Cloudinary feedback survey. citehttps://hackindia.org/2026/pixels-to-products-cloudinary-ai-hackathon-2026
+Code freeze: **October 4, 2026 · 00:15 IST**. The final submission must include the public GitHub repository, live demo, 2–4 minute demo video, LinkedIn and X project-post links, team details, and confirmation of the mandatory Cloudinary feedback survey.
 
 
 Before final submission, keep these ready:
