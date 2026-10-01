@@ -1,15 +1,19 @@
 # PixelPilot
 
-> Turn media into business momentum.
+> **Turn media into business momentum.**
 
 PixelPilot is an AI growth operating system for small businesses that turns existing media into business intelligence, optimized content, and actionable growth campaigns.
 
 ## HackIndia — Pixels to Products — Cloudinary AI Hackathon 2026
 
-- Track: PS-03 — Your Media-Savvy Startup
-- Team: Quantum Nexus
-- Core technology: Cloudinary + Gemini 2.5 Flash
-- Product: PixelPilot
+| Field | Details |
+|---|---|
+| Product | PixelPilot |
+| Team | Quantum Nexus |
+| Track | PS-03 — Your Media-Savvy Startup |
+| Core technology | Cloudinary + Gemini 2.5 Flash |
+| Live demo | https://pixelpilot-ai-neon.vercel.app/ |
+| GitHub | https://github.com/esakki-2008/pixelpilot-ai |
 
 ## The problem
 
@@ -27,11 +31,15 @@ A business can upload media, receive AI-powered asset intelligence, generate Clo
 
 Cloudinary is part of the product workflow, not just hosting:
 
-1. Upload — media enters the workspace through Cloudinary.
-2. Delivery — assets are delivered through Cloudinary URLs.
-3. Optimization — PixelPilot creates responsive variants using Cloudinary transformations such as c_fill, q_auto, and f_auto.
-4. Multi-channel creative delivery — Instagram, Story, LinkedIn, and Web variants are generated from Cloudinary assets.
-5. Asset workflow — source assets are connected to AI analysis, campaigns, and saved workspace history.
+1. **Upload** — media enters the workspace through Cloudinary.
+2. **Delivery** — assets are delivered through Cloudinary URLs.
+3. **Optimization** — PixelPilot creates responsive variants using Cloudinary transformations such as `c_fill`, `q_auto`, and `f_auto`.
+4. **Multi-channel creative delivery** — Instagram, Story, LinkedIn, and Web variants are generated from Cloudinary assets.
+5. **Asset workflow** — source assets are connected to AI analysis, campaigns, and saved workspace history.
+
+The judging flow can therefore demonstrate a visible Cloudinary chain:
+
+**Upload → Cloudinary storage → AI understanding → Cloudinary transformation → optimized delivery → campaign creative**
 
 ## AI intelligence
 
@@ -64,6 +72,7 @@ Turn detected issues and opportunities into executable next actions.
 
 ## Architecture
 
+```
 Business Media
      |
      v
@@ -87,11 +96,12 @@ Next.js Application
             +-- Content Packages
             +-- Cloudinary Creatives
             +-- Campaign History
+```
 
 ## Tech stack
 
-- Next.js 16
-- React
+- Next.js 15.5.26
+- React 19
 - TypeScript
 - Cloudinary
 - next-cloudinary
@@ -107,7 +117,7 @@ cd pixelpilot-ai
 npm install
 ```
 
-Create .env.local:
+Create `.env.local`:
 
 ```env
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
@@ -121,24 +131,33 @@ Then run:
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open `http://localhost:3000`.
 
 ## Demo path
 
-For a 2–4 minute presentation:
+The demo video will be recorded only after the final QA and compliance checks.
+
+Recommended product walkthrough:
 
 1. Open PixelPilot and show the connected Cloudinary workspace.
-2. Upload a few product images.
-3. Analyze an asset and show Media Health, readiness, issues, and opportunities.
+2. Upload a product image.
+3. Show Asset Intelligence with Media Health, readiness, issues, opportunities, and recommendation.
 4. Open Creative Studio and show Cloudinary's optimized channel variants.
-5. Select a Growth Opportunity and activate a campaign.
-6. Show generated campaign creatives and platform-specific content.
-7. Open Business Copilot and ask: “What should I promote first?”
-8. Finish at the AI Action Center and execute an action.
+5. Activate a Growth Opportunity.
+6. Generate a campaign and show Campaign Creatives plus Content Intelligence.
+7. Ask Business Copilot: **“What should I promote first?”**
+8. Finish with the AI Action Center.
 
-## Demo talking point
+## Submission assets
 
-> PixelPilot does not stop at understanding media. It connects media intelligence to optimized delivery, growth recommendations, campaign creation, and concrete next actions.
+Before final submission, keep these ready:
+
+- Public GitHub repository: https://github.com/esakki-2008/pixelpilot-ai
+- Production demo: https://pixelpilot-ai-neon.vercel.app/
+- 2–4 minute demo video
+- HackIndia team/project submission
+- Cloudinary feedback survey confirmation
+- Final end-to-end smoke-test confirmation
 
 ## Submission checklist
 
@@ -151,12 +170,12 @@ For a 2–4 minute presentation:
 - [x] Action Center
 - [x] Responsive startup-style UI
 - [x] Environment template
+- [x] Production deployment configured
+- [ ] Final production smoke test
 - [ ] Record 2–4 minute demo video
-- [ ] Verify public live demo before submission
 - [ ] Complete required Cloudinary feedback survey
-- [ ] Final submission form/repository links
-- [ ] Final end-to-end smoke test
+- [ ] Final HackIndia submission form/repository links
 
 ## Security
 
-Never commit API keys or secrets. Keep .env.local private and use environment variables for deployment.
+Never commit API keys or secrets. Keep `.env.local` private and use environment variables for deployment. The public repository should contain only `.env.example` placeholders.
