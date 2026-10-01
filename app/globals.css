@@ -45,3 +45,122 @@
 .action-center{padding:28px 0}.action-list{display:grid;gap:9px}.action-card{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:15px;border:1px solid #29425d;border-radius:11px;background:linear-gradient(145deg,#0d1d31,#091523)}.action-card-main{min-width:0}.action-type{font-size:7px;letter-spacing:1px;text-transform:uppercase;font-weight:900;color:#5ca9db}.action-card h3{margin:6px 0 3px;color:#d9e8f6;font-size:12px}.action-product{margin:0 0 10px;color:#738ba3;font-size:8px}.action-reason{border-left:2px solid #274762;padding-left:9px}.action-reason span{font-size:7px;letter-spacing:1px;color:#607c97;font-weight:900}.action-reason p{margin:4px 0 0;color:#8ca4ba;font-size:8px;line-height:1.5}.action-execute{display:flex;align-items:center;gap:6px;white-space:nowrap;flex:none}.action-empty{margin-top:10px}@media(max-width:650px){.action-card{flex-direction:column;align-items:stretch}.action-execute{justify-content:center}}
 
 .toast{position:fixed;right:22px;bottom:22px;z-index:1000;display:flex;align-items:center;gap:9px;padding:11px 13px;border:1px solid #315b78;border-radius:10px;background:#0a1b2d;color:#cfe4f5;box-shadow:0 12px 35px rgba(0,0,0,.35);font-size:9px}.toast svg{color:#5ec3a0}.toast button{border:0;background:none;color:#7892a9;font-size:16px;cursor:pointer;margin-left:4px}.workspace-status{display:flex;align-items:center;gap:10px;padding:7px 11px;border:1px solid #203b55;border-radius:8px;background:#081725;margin:8px 0 14px;color:#6f8aa3;font-size:8px}.workspace-status strong{color:#a9c3d9}.status-dot{width:6px;height:6px;border-radius:50%;background:#50c59b;box-shadow:0 0 8px #50c59b}.workspace-status span:not(.status-dot){white-space:nowrap}@media(max-width:650px){.workspace-status{overflow:auto}.toast{left:12px;right:12px;bottom:12px}}
+
+
+/* Demo showcase strip */
+.demo-strip{
+  margin-top:10px;
+  min-height:64px;
+  padding:10px 14px;
+  border:1px solid #27415f;
+  border-radius:12px;
+  background:linear-gradient(135deg,rgba(10,27,48,.94),rgba(8,19,34,.88));
+  display:grid;
+  grid-template-columns:minmax(210px,.8fr) minmax(420px,1.7fr) minmax(250px,1fr);
+  align-items:center;
+  gap:18px;
+}
+.demo-strip-label{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  min-width:0;
+}
+.demo-strip-label>strong{
+  color:#dbe9f7;
+  font-size:12px;
+  letter-spacing:-.2px;
+  white-space:nowrap;
+}
+.demo-live{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  flex:none;
+  color:#7de5aa;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1.5px;
+  white-space:nowrap;
+}
+.demo-live i{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#7de5aa;
+  box-shadow:0 0 10px rgba(125,229,170,.75);
+}
+.demo-flow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-width:0;
+  color:#b9cee3;
+  font-size:9px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.demo-flow span{
+  padding:6px 8px;
+  border:1px solid #263f5b;
+  border-radius:7px;
+  background:#0b1b2e;
+}
+.demo-flow b{
+  color:#62aaf4;
+  font-size:11px;
+  font-weight:500;
+}
+.cloudinary-badge{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  min-width:0;
+  color:#55e6e0;
+}
+.cloudinary-badge>svg{flex:none}
+.cloudinary-badge>span{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  min-width:0;
+}
+.cloudinary-badge strong{
+  color:#dbe9f7;
+  font-size:8px;
+  letter-spacing:1px;
+  white-space:nowrap;
+}
+.cloudinary-badge small{
+  color:#738ca6;
+  font-size:8px;
+  line-height:1.3;
+  white-space:nowrap;
+}
+@media(max-width:1100px){
+  .demo-strip{
+    grid-template-columns:1fr;
+    gap:9px;
+    padding:12px 14px;
+  }
+  .demo-strip-label{justify-content:center}
+  .demo-flow{overflow-x:auto;justify-content:flex-start;padding-bottom:2px}
+  .cloudinary-badge{justify-content:center}
+}
+@media(max-width:650px){
+  .demo-strip{
+    margin-top:8px;
+    padding:10px;
+  }
+  .demo-strip-label{
+    flex-direction:column;
+    gap:4px;
+  }
+  .demo-strip-label>strong{font-size:11px}
+  .demo-flow{gap:5px;font-size:8px}
+  .demo-flow span{padding:5px 7px}
+  .cloudinary-badge small{white-space:normal;text-align:center}
+  .cloudinary-badge>span{align-items:center}
+}
