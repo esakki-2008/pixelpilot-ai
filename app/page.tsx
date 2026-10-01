@@ -282,6 +282,20 @@ const growthOpportunities = analyzedAssets.flatMap((asset) =>
         <div className="business-meta"><span>Business Copilot</span><span>Cloudinary connected</span><span>AI intelligence live</span></div>
       </section>
 
+      <section className="demo-strip" aria-label="PixelPilot demo flow">
+        <div className="demo-strip-label">
+          <span className="demo-live"><i /> LIVE DEMO</span>
+          <strong>From pixels to decisions</strong>
+        </div>
+        <div className="demo-flow">
+          <span>Upload</span><b>→</b><span>Understand</span><b>→</b><span>Optimize</span><b>→</b><span>Recommend</span><b>→</b><span>Create</span><b>→</b><span>Grow</span>
+        </div>
+        <div className="cloudinary-badge">
+          <Cloud size={14} />
+          <span><strong>POWERED BY CLOUDINARY</strong><small>Storage · Transformation · Optimization · Delivery</small></span>
+        </div>
+      </section>
+
       <section className="hero" id="dashboard">
         <div className="hero-copy">
           <div className="eyebrow"><span className="live-dot" /> AI BUSINESS COPILOT</div>
