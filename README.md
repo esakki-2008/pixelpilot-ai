@@ -14,6 +14,7 @@ PixelPilot is an AI growth operating system for small businesses that turns exis
 | Core technology | Cloudinary + Gemini 2.5 Flash |
 | Live demo | https://pixelpilot-ai-neon.vercel.app/ |
 | GitHub | https://github.com/esakki-2008/pixelpilot-ai |
+| Video demo | https://youtu.be/N2amHpHvfVA?si=c2xFoQKQduppfPFp |
 
 ## The problem
 
